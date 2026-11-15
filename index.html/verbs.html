@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verb Master Challenge - Regular & Irregular Verbs</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 min-h-screen text-white p-4">
+
+    <div class="max-w-3xl mx-auto">
+        <!-- HEADER -->
+        <header class="text-center my-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-yellow-400">⚡ Verb Master Challenge 🚀</h1>
+            <p class="text-sm text-purple-300 mt-2">ისწავლე და ივარჯიშე Regular და Irregular ზმნებში!</p>
+        </header>
+
+        <!-- MAIN CONTAINER (Directly Visible) -->
+        <div id="game-container" class="space-y-6">
+            <!-- TABS -->
+            <div class="flex justify-center gap-2">
+                <button onclick="switchTab('cards')" id="btn-cards" class="px-4 py-2 rounded-xl font-bold bg-yellow-500 text-slate-900 text-sm shadow">📚 ზმნების სია</button>
+                <button onclick="switchTab('sorting')" id="btn-sorting" class="px-4 py-2 rounded-xl font-bold bg-slate-800 text-yellow-400 text-sm shadow border border-yellow-500">⚖️ გამოცნობის თამაში</button>
+                <button onclick="switchTab('quiz')" id="btn-quiz" class="px-4 py-2 rounded-xl font-bold bg-slate-800 text-yellow-400 text-sm shadow border border-yellow-500">⏰ V2 ტესტი</button>
+            </div>
+
+            <!-- TAB 1: CARDS (Dictionary) -->
+            <div id="tab-content-cards" class="bg-slate-800/90 rounded-3xl p-6 border-2 border-purple-500 shadow-xl">
+                <h2 class="text-xl font-bold text-yellow-400 mb-4 text-center">20 ძირითადი ზმნა (10 წესიერი და 10 არაწესიერი)</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2" id="verbs-list-container">
+                    <!-- Dynamic Verbs List -->
+                </div>
+            </div>
+
+            <!-- TAB 2: SORTING GAME -->
+            <div id="tab-content-sorting" class="hidden bg-slate-800/90 rounded-3xl p-6 border-2 border-blue-500 shadow-xl text-center">
+                <h2 class="text-xl font-bold text-blue-300 mb-2">რომელი ტიპისაა ეს ზმნა?</h2>
+                <p class="text-xs text-gray-300 mb-6">დააკლიკე შესაბამის ღილაკს ქვემოთ!</p>
+                
+                <div id="sorting-card-box" class="bg-slate-900 p-6 rounded-2xl border-2 border-slate-700 max-w-sm mx-auto mb-6">
+                    <span id="sort-emoji" class="text-5xl block mb-2">⚽</span>
+                    <h3 id="sort-verb-text" class="text-3xl font-extrabold text-yellow-400 mb-1">play</h3>
+                    <p id="sort-verb-meaning" class="text-sm text-gray-400">თამაში</p>
+                </div>
+
+                <div class="flex justify-center gap-4">
+                    <button onclick="checkSorting('regular')" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg text-sm">
+                        🔵 წესიერი (Regular -ed)
+                    </button>
+                    <button onclick="checkSorting('irregular')" class="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-lg text-sm">
+                        🟠 არაწესიერი (Irregular)
+                    </button>
+                </div>
+                <div id="sorting-feedback" class="mt-4 font-bold text-lg"></div>
+            </div>
+
+            <!-- TAB 3: V2 TIME TEST -->
+            <div id="tab-content-quiz" class="hidden bg-slate-800/90 rounded-3xl p-6 border-2 border-yellow-500 shadow-xl text-center max-w-lg mx-auto">
+                <div id="quiz-box">
+                    <!-- Dynamic Quiz -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const allVerbs = [
+            // Regular (10)
+            { v1: "play", v2: "played", type: "regular", emoji: "⚽", meaning: "თამაში" },
+            { v1: "work", v2: "worked", type: "regular", emoji: "💼", meaning: "მუშაობა" },
+            { v1: "listen", v2: "listened", type: "regular", emoji: "🎧", meaning: "მოსმენა" },
+            { v1: "watch", v2: "watched", type: "regular", emoji: "📺", meaning: "ყურება" },
+            { v1: "walk", v2: "walked", type: "regular", emoji: "🚶‍♂️", meaning: "სეირნობა" },
+            { v1: "clean", v2: "cleaned", type: "regular", emoji: "🧹", meaning: "დალაგება" },
+            { v1: "jump", v2: "jumped", type: "regular", emoji: "🦘", meaning: "ხტომა" },
+            { v1: "cook", v2: "cooked", type: "regular", emoji: "🍳", meaning: "მომზადება" },
+            { v1: "talk", v2: "talked", type: "regular", emoji: "🗣️", meaning: "საუბარი" },
+            { v1: "paint", v2: "painted", type: "regular", emoji: "🎨", meaning: "ხატვა" },
+            // Irregular (10)
+            { v1: "go", v2: "went", type: "irregular", emoji: "🏃‍♂️", meaning: "წასვლა" },
+            { v1: "eat", v2: "ate", type: "irregular", emoji: "🍎", meaning: "ჭამა" },
+            { v1: "see", v2: "saw", type: "irregular", emoji: "👁️", meaning: "ნახვა" },
+            { v1: "write", v2: "wrote", type: "irregular", emoji: "✍️", meaning: "წერა" },
+            { v1: "have", v2: "had", type: "irregular", emoji: "🤲", meaning: "ქონა" },
+            { v1: "make", v2: "made", type: "irregular", emoji: "🛠️", meaning: "კეთება" },
+            { v1: "take", v2: "took", type: "irregular", emoji: "🤲", meaning: "აღება" },
+            { v1: "run", v2: "ran", type: "irregular", emoji: "🏃‍♀️", meaning: "სირბილი" },
+            { v1: "read", v2: "read", type: "irregular", emoji: "📖", meaning: "კითხვა" },
+            { v1: "buy", v2: "bought", type: "irregular", emoji: "🛍️", meaning: "ყიდვა" }
+        ];
+
+        let sortingQueue = [];
+        let currentSortItem = null;
+        
+        let irregularList = allVerbs.filter(v => v.type === 'irregular');
+        let currentQuizIdx = 0;
+        let quizScore = 0;
+
+        // Auto-initialize on load
+        window.onload = function() {
+            initCards();
+            initSortingGame();
+            initQuiz();
+        };
+
+        function switchTab(tab) {
+            ['cards', 'sorting', 'quiz'].forEach(t => {
+                document.getElementById(`tab-content-${t}`).classList.add('hidden');
+                document.getElementById(`btn-${t}`).className = "px-4 py-2 rounded-xl font-bold bg-slate-800 text-yellow-400 text-sm shadow border border-yellow-500";
+            });
+            document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
+            document.getElementById(`btn-${tab}`).className = "px-4 py-2 rounded-xl font-bold bg-yellow-500 text-slate-900 text-sm shadow";
+        }
+
+        // Tab 1: Cards
+        function initCards() {
+            const container = document.getElementById("verbs-list-container");
+            container.innerHTML = "";
+            allVerbs.forEach(v => {
+                container.innerHTML += `
+                    <div class="bg-slate-900 p-3 rounded-xl border border-purple-500/40 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${v.emoji}</span>
+                            <div>
+                                <h4 class="font-bold text-yellow-300 text-sm">${v.v1} ➔ <span class="text-white">${v.v2}</span></h4>
+                                <p class="text-xs text-gray-400">${v.meaning}</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full uppercase font-bold ${v.type === 'regular' ? 'bg-blue-900 text-blue-200' : 'bg-amber-900 text-amber-200'}">${v.type}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Tab 2: Sorting Game
+        function initSortingGame() {
+            sortingQueue = [...allVerbs].sort(() => Math.random() - 0.5);
+            loadNextSortingItem();
+        }
+
+        function loadNextSortingItem() {
+            if (sortingQueue.length === 0) {
+                document.getElementById("sorting-card-box").innerHTML = `<div class="py-4 text-green-400 font-bold">🎉 ყოჩაღ! ყველა ზმნა წარმატებით დაასარისხე!</div>`;
+                return;
+            }
+            currentSortItem = sortingQueue.pop();
+            document.getElementById("sort-emoji").innerText = currentSortItem.emoji;
+            document.getElementById("sort-verb-text").innerText = currentSortItem.v1;
+            document.getElementById("sort-verb-meaning").innerText = currentSortItem.meaning;
+            document.getElementById("sorting-feedback").innerText = "";
+        }
+
+        function checkSorting(selectedType) {
+            if (!currentSortItem) return;
+            const fb = document.getElementById("sorting-feedback");
+            if (selectedType === currentSortItem.type) {
+                fb.innerHTML = `<span class="text-green-400">სწორია! 🎉 (${currentSortItem.v2})</span>`;
+                setTimeout(loadNextSortingItem, 800);
+            } else {
+                fb.innerHTML = `<span class="text-red-400">არასწორია! სცადე თავიდან.</span>`;
+            }
+        }
+
+        // Tab 3: Quiz V2
+        function initQuiz() {
+            if (currentQuizIdx < irregularList.length) {
+                let v = irregularList[currentQuizIdx];
+                let wrongs = allVerbs.filter(item => item.v2 !== v.v2).sort(() => Math.random() - 0.5).slice(0, 3).map(item => item.v2);
+                let options = [...wrongs, v.v2].sort(() => Math.random() - 0.5);
+
+                let html = `
+                    <p class="text-xs text-purple-300 font-bold mb-2">კითხვა ${currentQuizIdx + 1} / ${irregularList.length}</p>
+                    <div class="text-4xl my-2">${v.emoji}</div>
+                    <h3 class="text-xl font-bold text-yellow-400 mb-1">რა არის წარსული ფორმა (V2):</h3>
+                    <p class="text-2xl font-black text-white mb-4 uppercase">${v.v1}</p>
+                    <div class="grid grid-cols-2 gap-2">
+                `;
+                options.forEach(opt => {
+                    html += `<button onclick="checkQuizAnswer('${opt}', '${v.v2}')" class="py-2.5 bg-slate-900 hover:bg-purple-900 border border-purple-500 rounded-xl font-bold text-yellow-200 text-sm transition">${opt}</button>`;
+                });
+                html += `</div>`;
+                document.getElementById("quiz-box").innerHTML = html;
+            } else {
+                document.getElementById("quiz-box").innerHTML = `
+                    <div class="py-4">
+                        <div class="text-5xl mb-3">🏆</div>
+                        <h3 class="text-xl font-bold text-yellow-400 mb-1">ყოჩაღ!</h3>
+                        <p class="text-sm text-gray-300 mb-4">შენ დააგროვე ${quizScore} ქულა ტესტში!</p>
+                        <button onclick="resetQuiz()" class="bg-yellow-500 text-slate-900 font-bold px-6 py-2 rounded-xl text-sm shadow">თავიდან თამაში 🔄</button>
+                    </div>
+                `;
+            }
+        }
+
+        function checkQuizAnswer(selected, correct) {
+            if (selected === correct) {
+                quizScore++;
+                alert("სწორია! 🎉");
+            } else {
+                alert(`არასწორია. სწორი ფორმაა: ${correct}`);
+            }
+            currentQuizIdx++;
+            initQuiz();
+        }
+
+        function resetQuiz() {
+            currentQuizIdx = 0;
+            quizScore = 0;
+            initQuiz();
+        }
+    </script>
+</body>
+</html>
